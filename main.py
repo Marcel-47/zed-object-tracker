@@ -8,24 +8,19 @@ from detector.zed_detector import TargetPosition
 from visualizer.visualizer import draw
 
 
-def select_closest(targets: list[TargetPosition]) -> TargetPosition | None:
-    if not targets:
-        return None
-    return min(targets, key=lambda t: t.z)
-
-
-def format_terminal_output(all_targets: list[TargetPosition], selected: TargetPosition | None) -> str:
+def format_terminal_output(all_targets: list[TargetPosition], id_to_num: dict[int, int], selected_num: int | None) -> str:
     ts = datetime.now().strftime("%H:%M:%S.%f")[:-3]
     if not all_targets:
         return f"[{ts}] No ball detected"
     lines = [f"[{ts}] {len(all_targets)} ball(s) detected:"]
-    for i, t in enumerate(all_targets):
+    for t in all_targets:
+        num = id_to_num.get(t.track_id, "?")
         x_label = "right" if t.x >= 0 else "left"
         y_label = "up" if t.y >= 0 else "down"
         z_label = "away" if t.z >= 0 else "towards"
-        marker = " [closest]" if t is selected else ""
+        marker = " [selected]" if num == selected_num else ""
         lines.append(
-            f"  #{i+1}{marker} | "
+            f"  #{num}{marker} | "
             f"X: {t.x:+.2f}m ({x_label}) | "
             f"Y: {t.y:+.2f}m ({y_label}) | "
             f"Z: {t.z:+.2f}m ({z_label})"
@@ -77,7 +72,11 @@ def main():
     obj_runtime_param.detection_confidence_threshold = 15  # Adjust based on your environment and needs
     zed.set_object_detection_runtime_parameters(obj_runtime_param)  # can be updated mid-run
 
-    print("Tracking started. Press 'q' to quit.")
+    print("Tracking started. Press a number key to select an object, 'q' to quit.")
+
+    id_to_num: dict[int, int] = {}
+    next_num = 1
+    selected_num: int | None = None
 
     while True:
         if zed.grab() != sl.ERROR_CODE.SUCCESS:
@@ -88,18 +87,25 @@ def main():
 
         frame = cv2.cvtColor(image.get_data(), cv2.COLOR_BGRA2BGR)
         all_targets = detector.get_all_target_positions(frame, objects)
-        selected = select_closest(all_targets)
 
-        annotated = draw(frame, all_targets, selected)
-        label = "Press 'q' to quit"
+        for t in all_targets:
+            if t.track_id not in id_to_num:
+                id_to_num[t.track_id] = next_num
+                next_num += 1
+
+        annotated = draw(frame, all_targets, id_to_num, selected_num)
+        label = "Press number to select | 'q' to quit"
         (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
         cv2.putText(annotated, label, (annotated.shape[1] - w - 10, h + 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
         cv2.imshow("ZED Tennis Ball Tracker", annotated)
-        print(format_terminal_output(all_targets, selected))
+        print(format_terminal_output(all_targets, id_to_num, selected_num))
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q'):
             break
+        if ord('1') <= key <= ord('9'):
+            selected_num = key - ord('0')
 
     # Close the camera
     zed.disable_object_detection()

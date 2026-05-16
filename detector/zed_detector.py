@@ -13,6 +13,7 @@ class TargetPosition:
     z: float           # distance from camera in meters
     confidence: float  # detection confidence between 0.0 (low) and 1.0 (high)
     bbox: tuple[int, int, int, int]  # bounding box as (x1, y1, x2, y2) in pixels
+    track_id: int = 0  # stable ID assigned by the ZED SDK tracker
 
 
 class Detector(ABC):
@@ -58,5 +59,5 @@ class ZEDDetector(Detector):
             y1 = int(bbox_corners[0][1])
             x2 = int(bbox_corners[2][0])
             y2 = int(bbox_corners[2][1])
-            results.append(TargetPosition(x=x, y=y, z=z, confidence=confidence, bbox=(x1, y1, x2, y2)))
+            results.append(TargetPosition(x=x, y=y, z=z, confidence=confidence, bbox=(x1, y1, x2, y2), track_id=int(obj.id)))
         return results
