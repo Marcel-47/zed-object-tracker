@@ -1,13 +1,16 @@
 # zed-object-tracker
 
-Real-time object detection and tracking using a ZED stereo camera. Detects objects in 3D space and overlays bounding boxes with position data (X/Y/Z in meters) on the live camera feed.
+> **Work in progress.** This project is under active development.
+
+Real-time object detection and tracking using a ZED stereo camera. Detects objects in 3D space and overlays bounding boxes with position data (X/Y/Z in meters) on the live camera feed. Intended as the perception layer for a robotic arm controller.
 
 ## Features
 
-- Live object detection using the ZED SDK's configured model
-- 3D position output (left/right, up/down, distance) per detected object
-- Filters for sport-class objects (e.g. balls)
-- Visual overlay with bounding boxes and labeled coordinates via OpenCV
+- Live object detection using the ZED SDK (`MULTI_CLASS_BOX_ACCURATE` model)
+- 3D position output per detected object (X=right/left, Y=up/down, Z=distance in meters)
+- Stable per-session object numbering with manual selection (digit keys)
+- Visual overlay: bounding boxes, number badges, position labels
+- Throttled terminal output (once per second) for position logging
 
 ## Requirements
 
@@ -23,8 +26,33 @@ Real-time object detection and tracking using a ZED stereo camera. Detects objec
 python main.py
 ```
 
-The camera will initialise, load the object detection module, and begin processing frames. Detected objects of the configured class are highlighted with a bounding box and their 3D position relative to the camera.
+The camera initialises, loads the object detection module, and begins processing frames.
 
+| Key | Action |
+|-----|--------|
+| `1`–`9` | Select object by display number (highlights red) |
+| `0` | _(planned)_ Deselect |
+| `q` | Quit |
+
+Detected objects are filtered to `FRUIT_VEGETABLE` class (tennis balls fall here). Confidence threshold and object class can be changed in `main.py` and `detector/zed_detector.py`.
+
+## Architecture
+
+```
+main.py                  — camera init, main loop, keypress handling, terminal output
+detector/zed_detector.py — ZED SDK wrapper, returns list[TargetPosition]
+visualizer/visualizer.py — draws boxes, number badges, and position labels onto frames
+```
+
+`TargetPosition` is the core data type: `x, y, z` (meters), `confidence`, `bbox` (pixels), `track_id`.
+
+## Hardware
+
+Runs on a Jetson (ARM). Per-frame allocations and rendering calls are treated as expensive. See `CLAUDE.md` for development guidelines.
+
+## Backlog
+
+Planned improvements are tracked in [BACKLOG.md](BACKLOG.md).
 
 ## License
 
