@@ -44,8 +44,6 @@ detector/zed_detector.py — ZED SDK wrapper, returns list[TargetPosition]
 visualizer/visualizer.py — draws boxes, number badges, and position labels onto frames
 ```
 
-`TargetPosition` is the core data type: `x, y, z` (meters), `confidence`, `bbox` (pixels), `track_id`.
-
 ## Hardware
 
 Runs on a Jetson (ARM). Per-frame allocations and rendering calls are treated as expensive.
