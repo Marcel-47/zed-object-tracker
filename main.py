@@ -70,7 +70,7 @@ def main():
     obj_runtime_param = sl.ObjectDetectionRuntimeParameters()
     # Minimum confidence (0–100) for a detection to be reported.
     # Lower values catch more objects but increase false positives; raise to filter noise.
-    obj_runtime_param.detection_confidence_threshold = 40  # Adjust based on your environment and needs
+    obj_runtime_param.detection_confidence_threshold = 40  # Adjust based on your environment and needs - lower for more detections, higher to reduce false positives
     zed.set_object_detection_runtime_parameters(obj_runtime_param)  # can be updated mid-run
 
     print("Tracking started. Press a number key to select an object, 'q' to quit.")
