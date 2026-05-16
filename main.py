@@ -73,7 +73,7 @@ def main():
     obj_runtime_param.detection_confidence_threshold = 40  # Adjust based on your environment and needs - lower for more detections, higher to reduce false positives
     zed.set_object_detection_runtime_parameters(obj_runtime_param)  # can be updated mid-run
 
-    print("Tracking started. Press a number key to select an object, 'q' to quit.")
+    print("Tracking started. Press a number key to select an object, '0' to deselect, 'q' to quit.")
 
     id_to_num: dict[int, int] = {}
     next_num = 1
@@ -96,7 +96,7 @@ def main():
                 next_num += 1
 
         annotated = draw(frame, all_targets, id_to_num, selected_num)
-        label = "Press number to select | 'q' to quit"
+        label = "Press number to select | '0' to deselect | 'q' to quit"
         (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
         cv2.putText(annotated, label, (annotated.shape[1] - w - 10, h + 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
@@ -109,7 +109,9 @@ def main():
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):
             break
-        if ord('1') <= key <= ord('9'):
+        if key == ord('0'):
+            selected_num = None
+        elif ord('1') <= key <= ord('9'):
             selected_num = key - ord('0')
 
     # Close the camera
