@@ -14,19 +14,23 @@ def select_closest(targets: list[TargetPosition]) -> TargetPosition | None:
     return min(targets, key=lambda t: t.z)
 
 
-def format_terminal_output(selected: TargetPosition | None) -> str:
+def format_terminal_output(all_targets: list[TargetPosition], selected: TargetPosition | None) -> str:
     ts = datetime.now().strftime("%H:%M:%S.%f")[:-3]
-    if selected is None:
+    if not all_targets:
         return f"[{ts}] No ball detected"
-    x_label = "right" if selected.x >= 0 else "left"
-    y_label = "up" if selected.y >= 0 else "down"
-    z_label = "away" if selected.z >= 0 else "towards"
-    return (
-        f"[{ts}] Ball detected | "
-        f"X: {selected.x:+.2f}m ({x_label}) | "
-        f"Y: {selected.y:+.2f}m ({y_label}) | "
-        f"Z: {selected.z:+.2f}m ({z_label})"
-    )
+    lines = [f"[{ts}] {len(all_targets)} ball(s) detected:"]
+    for i, t in enumerate(all_targets):
+        x_label = "right" if t.x >= 0 else "left"
+        y_label = "up" if t.y >= 0 else "down"
+        z_label = "away" if t.z >= 0 else "towards"
+        marker = " [closest]" if t is selected else ""
+        lines.append(
+            f"  #{i+1}{marker} | "
+            f"X: {t.x:+.2f}m ({x_label}) | "
+            f"Y: {t.y:+.2f}m ({y_label}) | "
+            f"Z: {t.z:+.2f}m ({z_label})"
+        )
+    return "\n".join(lines)
 
 def main():
     # Create a Camera object
@@ -92,7 +96,7 @@ def main():
         cv2.putText(annotated, label, (annotated.shape[1] - w - 10, h + 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
         cv2.imshow("ZED Tennis Ball Tracker", annotated)
-        print(format_terminal_output(selected))
+        print(format_terminal_output(all_targets, selected))
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
