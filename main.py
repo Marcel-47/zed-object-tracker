@@ -1,4 +1,5 @@
 import sys
+import time
 from datetime import datetime
 import cv2
 import pyzed.sl as sl
@@ -69,7 +70,7 @@ def main():
     obj_runtime_param = sl.ObjectDetectionRuntimeParameters()
     # Minimum confidence (0–100) for a detection to be reported.
     # Lower values catch more objects but increase false positives; raise to filter noise.
-    obj_runtime_param.detection_confidence_threshold = 15  # Adjust based on your environment and needs
+    obj_runtime_param.detection_confidence_threshold = 40  # Adjust based on your environment and needs
     zed.set_object_detection_runtime_parameters(obj_runtime_param)  # can be updated mid-run
 
     print("Tracking started. Press a number key to select an object, 'q' to quit.")
@@ -77,6 +78,7 @@ def main():
     id_to_num: dict[int, int] = {}
     next_num = 1
     selected_num: int | None = None
+    last_print_time = 0.0
 
     while True:
         if zed.grab() != sl.ERROR_CODE.SUCCESS:
@@ -99,7 +101,10 @@ def main():
         cv2.putText(annotated, label, (annotated.shape[1] - w - 10, h + 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
         cv2.imshow("ZED Tennis Ball Tracker", annotated)
-        print(format_terminal_output(all_targets, id_to_num, selected_num))
+        now = time.monotonic()
+        if now - last_print_time >= 1.0:
+            print(format_terminal_output(all_targets, id_to_num, selected_num))
+            last_print_time = now
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord('q'):

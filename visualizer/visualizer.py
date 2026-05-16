@@ -29,10 +29,10 @@ def draw(frame, all_targets, id_to_num: dict, selected_num: int | None):
 
         # Number badge in the top-left corner of the box
         num_label = f"#{num}" if num is not None else "?"
-        cv2.putText(out, num_label, (x1 + 4, y1 + 18), FONT, 0.6, color, 2, cv2.LINE_AA)
+        cv2.putText(out, num_label, (x1 + 4, y1 + 18), FONT, 0.6, color, 2)
 
         # Position info just above the box
         text_y = max(y1 - 8, 15)
-        cv2.putText(out, _pos_label(target), (x1, text_y), FONT, 0.45, color, 1, cv2.LINE_AA)
+        cv2.putText(out, _pos_label(target), (x1, text_y), FONT, 0.45, color, 1)
 
     return out
