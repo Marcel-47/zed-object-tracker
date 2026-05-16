@@ -48,9 +48,6 @@ visualizer/visualizer.py — draws boxes, number badges, and position labels ont
 
 Runs on a Jetson (ARM). Per-frame allocations and rendering calls are treated as expensive.
 
-## Backlog
-
-Planned improvements are tracked in [BACKLOG.md](BACKLOG.md).
 
 ## License
 
