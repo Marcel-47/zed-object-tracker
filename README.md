@@ -6,7 +6,7 @@ Real-time object detection and tracking using a ZED stereo camera. Detects objec
 
 ## Features
 
-- Live object detection using the ZED SDK (`MULTI_CLASS_BOX_ACCURATE` model)
+- Live object detection using the ZED SDK
 - 3D position output per detected object (X=right/left, Y=up/down, Z=distance in meters)
 - Stable per-session object numbering with manual selection (digit keys)
 - Visual overlay: bounding boxes, number badges, position labels
@@ -31,10 +31,10 @@ The camera initialises, loads the object detection module, and begins processing
 | Key | Action |
 |-----|--------|
 | `1`–`9` | Select object by display number (highlights red) |
-| `0` | _(planned)_ Deselect |
+| `0` | Deselect |
 | `q` | Quit |
 
-Detected objects are filtered to `FRUIT_VEGETABLE` class (tennis balls fall here). Confidence threshold and object class can be changed in `main.py` and `detector/zed_detector.py`.
+Detected objects are filtered to the configured class. Confidence threshold and object class can be changed in `main.py` and `detector/zed_detector.py`.
 
 ## Architecture
 
