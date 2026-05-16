@@ -1,7 +1,6 @@
 import sys
 from datetime import datetime
 import cv2
-import keyboard
 import pyzed.sl as sl
 import numpy as np
 from detector.zed_detector import ZEDDetector
