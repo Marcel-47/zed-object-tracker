@@ -21,6 +21,7 @@ Ideas from the visualization phase brainstorm. Pick any item and ask Claude to i
 - **Trajectory trails** [PERF RISK] — capped `deque` of past centroids per `track_id`, drawn as `cv2.polylines`; needs same pruning fix as `id_to_num`
 - **Velocity estimation** — buffer last 2–5 positions per `track_id`, compute `Δx/Δt, Δy/Δt, Δz/Δt` in m/s; groundwork for robotic arm lead compensation
 - **Position export / session logging** [PERF RISK] — toggle `l` to write JSON lines to a file; must buffer writes (background thread or non-empty-only) to avoid blocking the loop
+- **Training an own object detection model** [HARD] - last feature to be implemented. Irelevent right know. Just keep in mind.
 
 ---
 
