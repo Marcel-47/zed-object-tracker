@@ -48,7 +48,7 @@ visualizer/visualizer.py — draws boxes, number badges, and position labels ont
 
 ## Hardware
 
-Runs on a Jetson (ARM). Per-frame allocations and rendering calls are treated as expensive. See `CLAUDE.md` for development guidelines.
+Runs on a Jetson (ARM). Per-frame allocations and rendering calls are treated as expensive.
 
 ## Backlog
 
