@@ -47,13 +47,15 @@ worth monitoring if many objects are on screen simultaneously.
 ## Architecture overview
 ```
 main.py                  — camera init, main loop, keypress handling, terminal output
+config.py                — config loading, enum mappings, interactive --configure prompt
+config.json              — user-editable parameters (edit directly or via --configure)
 detector/zed_detector.py — wraps ZED SDK object detection, returns list[TargetPosition]
 visualizer/visualizer.py — draws boxes, number badges, and position labels onto frames
 ```
 
 ### Key data type
 `TargetPosition` (detector/zed_detector.py) — one detected object per frame:
-- `x, y, z` — position in meters (camera coordinate system)
+- `x, y, z` — position in the configured coordinate unit (default: meters)
 - `confidence` — 0.0–1.0
 - `bbox` — (x1, y1, x2, y2) pixels
 - `track_id` — stable ID from the ZED SDK tracker (persists across frames)
@@ -66,11 +68,18 @@ display numbers (1, 2, 3…). Numbers are never reused within a session.
 The user presses a digit key to select an object by its display number. Selected object
 gets a red box; all others are green. No automatic selection logic.
 
-### Detection filter
-Currently tracking `sl.OBJECT_CLASS.FRUIT_VEGETABLE` (tennis balls fall into this
-class). Confidence threshold is set in `main.py` via
-`obj_runtime_param.detection_confidence_threshold`. Too low → false positives (bodies
-detected); too high → distant balls missed. Current value: 40.
+### Configuration
+All camera and detection parameters live in `config.json`. `config.py` loads the file,
+applies defaults for missing keys, and resolves string names to `sl.*` enum values.
+Run `python main.py --configure` to edit parameters interactively before starting.
+
+Currently tracking `FRUIT_VEGETABLE` (tennis balls fall into this class). Default
+confidence threshold is 40 — too low causes false positives (people misclassified),
+too high misses distant balls.
+
+Planned next CLI feature: `--set key=value` session overrides (e.g.
+`--set detection_confidence_threshold=50`) that apply for one run without modifying
+`config.json`.
 
 ## Known gotchas
 - At low confidence thresholds (< ~30), the multi-class model misclassifies people as
