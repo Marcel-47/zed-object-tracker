@@ -57,10 +57,14 @@ _DEFAULTS = {
     "detection_model":               "MULTI_CLASS_BOX_ACCURATE",  # see DETECTION_MODEL_MAP for valid values
     "detection_confidence_threshold": 40,                # 0–100; lower catches more objects but increases false positives
     "object_class":                  "FRUIT_VEGETABLE",  # see OBJECT_CLASS_MAP for valid values
+    "proximity_warning_threshold":   1.0,               # distance below which the CLOSE warning triggers (in coordinate_units)
 }
 
 
-# Drives the --configure prompt: (key, description, valid options or None for free integer 0-100)
+# Fields where None valid-options means a positive float (vs. integer 0-100 for all other None fields)
+_FLOAT_FIELDS = {"proximity_warning_threshold"}
+
+# Drives the --configure prompt: (key, description, valid options or None for free numeric input)
 _CONFIGURE_FIELDS = [
     ("depth_mode",
      "Depth estimation algorithm. Higher modes are more accurate but cost more compute on the Jetson.",
@@ -86,6 +90,9 @@ _CONFIGURE_FIELDS = [
     ("object_class",
      "Object class to track. E.g., FRUIT_VEGETABLE covers fruit, vegetables, and similar round objects. See ZED SDK docs for details.",
      list(OBJECT_CLASS_MAP)),
+    ("proximity_warning_threshold",
+     "Distance threshold (in coordinate_units) below which a CLOSE warning and orange highlight appear.",
+     None),
 ]
 
 
@@ -106,8 +113,10 @@ def run_configure(path="config.json"):
         print(f"  {desc}")
         if valid is not None:
             print(f"  Options : {', '.join(valid)}")
+        elif key in _FLOAT_FIELDS:
+            print(f"  Range   : positive number")
         else:
-            print(f"  Range   : 0-100")
+            print(f"  Range   : 0-100 (integer)")
         print(f"  Current : {display}")
 
         while True:
@@ -117,6 +126,14 @@ def run_configure(path="config.json"):
             if valid is not None:
                 if val not in valid:
                     print(f"  Invalid. Choose from: {', '.join(valid)}")
+                    continue
+            elif key in _FLOAT_FIELDS:
+                try:
+                    v = float(val)
+                    if v < 0:
+                        raise ValueError
+                except ValueError:
+                    print("  Invalid. Enter a positive number (e.g. 1.0).")
                     continue
             else:
                 try:
@@ -134,6 +151,7 @@ def run_configure(path="config.json"):
     raw["enable_tracking"] = str(raw["enable_tracking"]).lower() == "true"
     raw["enable_segmentation"] = str(raw["enable_segmentation"]).lower() == "true"
     raw["detection_confidence_threshold"] = int(raw["detection_confidence_threshold"])
+    raw["proximity_warning_threshold"] = float(raw["proximity_warning_threshold"])
 
     with open(path, "w") as f:
         json.dump(raw, f, indent=4)
@@ -154,4 +172,5 @@ def load_config(path="config.json"):
         "detection_model":               DETECTION_MODEL_MAP[cfg["detection_model"]],
         "detection_confidence_threshold": int(cfg["detection_confidence_threshold"]),
         "object_class":                  OBJECT_CLASS_MAP[cfg["object_class"]],
+        "proximity_warning_threshold":   float(cfg["proximity_warning_threshold"]),
     }

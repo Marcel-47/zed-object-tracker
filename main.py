@@ -1,6 +1,7 @@
 import sys
 import argparse
 import time
+from collections import deque
 from datetime import datetime
 import cv2
 import pyzed.sl as sl
@@ -89,10 +90,18 @@ def main():
     next_num = 1
     selected_num: int | None = None
     last_print_time = 0.0
+    frame_times: deque = deque(maxlen=30)
+    last_frame_time = time.monotonic()
 
     while True:
         if zed.grab() != sl.ERROR_CODE.SUCCESS:
             continue
+
+        now = time.monotonic()
+        frame_times.append(now - last_frame_time)
+        last_frame_time = now
+        total = sum(frame_times)
+        fps = len(frame_times) / total if total > 0 else None
 
         zed.retrieve_image(image, sl.VIEW.LEFT)
         zed.retrieve_objects(objects, obj_runtime_param)
@@ -105,13 +114,13 @@ def main():
                 id_to_num[t.track_id] = next_num
                 next_num += 1
 
-        annotated = draw(frame, all_targets, id_to_num, selected_num)
+        annotated = draw(frame, all_targets, id_to_num, selected_num,
+                         fps=fps, proximity_threshold=cfg["proximity_warning_threshold"])
         label = "Press number to select | '0' to deselect | 'q' to quit"
         (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
         cv2.putText(annotated, label, (annotated.shape[1] - w - 10, h + 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
         cv2.imshow("ZED Object Tracker", annotated)
-        now = time.monotonic()
         if now - last_print_time >= 1.0:
             print(format_terminal_output(all_targets, id_to_num, selected_num))
             last_print_time = now
