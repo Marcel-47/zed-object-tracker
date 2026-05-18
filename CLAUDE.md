@@ -73,9 +73,9 @@ All camera and detection parameters live in `config.json`. `config.py` loads the
 applies defaults for missing keys, and resolves string names to `sl.*` enum values.
 Run `python main.py --configure` to edit parameters interactively before starting.
 
-Currently tracking `FRUIT_VEGETABLE` (tennis balls fall into this class). Default
-confidence threshold is 40 — too low causes false positives (people misclassified),
-too high misses distant balls.
+Default class is `FRUIT_VEGETABLE`, default threshold is 40. Too low causes false
+positives (people misclassified as the tracked class); too high misses distant or
+partially occluded objects.
 
 Planned next CLI feature: `--set key=value` session overrides (e.g.
 `--set detection_confidence_threshold=50`) that apply for one run without modifying
