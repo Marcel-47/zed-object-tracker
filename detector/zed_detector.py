@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any
+import math
 import numpy as np
 import pyzed.sl as sl
 
@@ -53,6 +54,8 @@ class ZEDDetector(Detector):
             if obj.label != self.object_class:
                 continue
             x, y, z = float(obj.position[0]), float(obj.position[1]), float(obj.position[2])
+            if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
+                continue
             confidence = float(obj.confidence) / 100.0
             bbox_corners = obj.bounding_box_2d
             x1 = int(bbox_corners[0][0])
