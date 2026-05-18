@@ -14,6 +14,12 @@ latency — update this file at that point.
   potentially expensive.
 - Only the ZED SDK and OpenCV are available for camera input and rendering.
 
+## Writing style
+Applies to README files, code comments, commit messages, and any other written documentation — not to conversational responses.
+
+- Avoid rhetorical contrast formulas ("This is not X, this is Y" / "Not X, but Y") used for dramatic effect.
+- Avoid em dashes (–) as stylistic connectors between sentence parts. Restructure the sentence instead.
+
 ## How to approach changes
 Always **explain the plan before touching code**. Describe what will change and why,
 then implement. If the approach has a meaningful tradeoff, name it.
@@ -23,6 +29,7 @@ then implement. If the approach has a meaningful tradeoff, name it.
 - Do not switch the detection model (`MULTI_CLASS_BOX_ACCURATE`) or change confidence
   thresholds — these are tuned to the environment.
 - Do not add comments unless the reason behind the code is genuinely non-obvious.
+- Do not remove existing comments without asking.
 - Do not introduce new abstractions or helper functions beyond what the task requires.
 
 ## Performance rules (Jetson-specific)
