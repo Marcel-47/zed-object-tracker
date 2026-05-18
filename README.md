@@ -40,6 +40,14 @@ Detected objects are filtered to the configured class. All tunable parameters ar
 
 All parameters are set in `config.json`. Valid values are also listed as comments in `config.py`.
 
+To edit the configuration interactively before starting the tracker, run:
+
+```bash
+python main.py --configure
+```
+
+This steps through each parameter, shows the current value and valid options, and saves the result to `config.json`. Press Enter to keep the current value for any parameter.
+
 | Key | Default | Valid values | Description |
 |-----|---------|--------------|-------------|
 | `depth_mode` | `NEURAL` | `PERFORMANCE` `QUALITY` `ULTRA` `NEURAL` `NEURAL_PLUS` | Depth estimation algorithm. Higher quality costs more compute. |
