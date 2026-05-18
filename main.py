@@ -14,8 +14,8 @@ from visualizer.visualizer import draw
 def format_terminal_output(all_targets: list[TargetPosition], id_to_num: dict[int, int], selected_num: int | None) -> str:
     ts = datetime.now().strftime("%H:%M:%S.%f")[:-3]
     if not all_targets:
-        return f"[{ts}] No ball detected"
-    lines = [f"[{ts}] {len(all_targets)} ball(s) detected:"]
+        return f"[{ts}] No object detected"
+    lines = [f"[{ts}] {len(all_targets)} object(s) detected:"]
     for t in all_targets:
         num = id_to_num.get(t.track_id, "?")
         x_label = "right" if t.x >= 0 else "left"
@@ -110,7 +110,7 @@ def main():
         (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
         cv2.putText(annotated, label, (annotated.shape[1] - w - 10, h + 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
-        cv2.imshow("ZED Tennis Ball Tracker", annotated)
+        cv2.imshow("ZED Object Tracker", annotated)
         now = time.monotonic()
         if now - last_print_time >= 1.0:
             print(format_terminal_output(all_targets, id_to_num, selected_num))

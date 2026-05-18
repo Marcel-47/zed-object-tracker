@@ -37,14 +37,14 @@ DETECTION_MODEL_MAP = {
 }
 
 # Valid values for "object_class" in config.json.
-# Tennis balls are classified as FRUIT_VEGETABLE by the ZED multi-class model.
+# FRUIT_VEGETABLE covers fruit, vegetables, and similar round objects.
 OBJECT_CLASS_MAP = {
     "PERSON":          sl.OBJECT_CLASS.PERSON,
     "VEHICLE":         sl.OBJECT_CLASS.VEHICLE,
     "BAG":             sl.OBJECT_CLASS.BAG,
     "ANIMAL":          sl.OBJECT_CLASS.ANIMAL,
     "ELECTRONICS":     sl.OBJECT_CLASS.ELECTRONICS,
-    "FRUIT_VEGETABLE": sl.OBJECT_CLASS.FRUIT_VEGETABLE,  # default — covers tennis balls
+    "FRUIT_VEGETABLE": sl.OBJECT_CLASS.FRUIT_VEGETABLE,  # default
     "SPORT":           sl.OBJECT_CLASS.SPORT,
 }
 
@@ -62,14 +62,30 @@ _DEFAULTS = {
 
 # Drives the --configure prompt: (key, description, valid options or None for free integer 0-100)
 _CONFIGURE_FIELDS = [
-    ("depth_mode",                    "Depth estimation algorithm",            list(DEPTH_MODE_MAP)),
-    ("coordinate_units",              "Unit for X/Y/Z position output",        list(UNIT_MAP)),
-    ("sdk_verbose",                   "ZED SDK logging (0=silent, 1=verbose)", ["0", "1"]),
-    ("enable_tracking",               "Stable object IDs across frames",       ["true", "false"]),
-    ("enable_segmentation",           "Per-object pixel masks (costs CPU)",    ["true", "false"]),
-    ("detection_model",               "Detection model quality vs. speed",     list(DETECTION_MODEL_MAP)),
-    ("detection_confidence_threshold","Minimum detection confidence",          None),
-    ("object_class",                  "Object class to track",                 list(OBJECT_CLASS_MAP)),
+    ("depth_mode",
+     "Depth estimation algorithm. Higher modes are more accurate but cost more compute on the Jetson.",
+     list(DEPTH_MODE_MAP)),
+    ("coordinate_units",
+     "Unit for all X/Y/Z position values reported per detected object.",
+     list(UNIT_MAP)),
+    ("sdk_verbose",
+     "ZED SDK log output to the terminal. Set to 0 to suppress SDK messages at startup.",
+     ["0", "1"]),
+    ("enable_tracking",
+     "Keeps object IDs stable across frames. Disabling reduces CPU load but IDs will reset each frame.",
+     ["true", "false"]),
+    ("enable_segmentation",
+     "Generates a per-object pixel mask. Disable to reduce CPU load — not used by the visualizer.",
+     ["true", "false"]),
+    ("detection_model",
+     "Balances detection quality against frame rate. FAST maximizes FPS; ACCURATE maximizes detection quality.",
+     list(DETECTION_MODEL_MAP)),
+    ("detection_confidence_threshold",
+     "Minimum confidence (0-100) to report a detection. E.g., below ~30, people may be misclassified as FRUIT_VEGETABLE.",
+     None),
+    ("object_class",
+     "Object class to track. E.g., FRUIT_VEGETABLE covers fruit, vegetables, and similar round objects. See ZED SDK docs for details.",
+     list(OBJECT_CLASS_MAP)),
 ]
 
 
@@ -86,7 +102,8 @@ def run_configure(path="config.json"):
         current = raw[key]
         display = str(current).lower() if isinstance(current, bool) else str(current)
 
-        print(f"{key}  ({desc})")
+        print(f"{key}")
+        print(f"  {desc}")
         if valid is not None:
             print(f"  Options : {', '.join(valid)}")
         else:
