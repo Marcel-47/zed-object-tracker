@@ -9,7 +9,9 @@ Real-time object detection and tracking using a ZED stereo camera. Detects objec
 - Live object detection using the ZED SDK
 - 3D position output per detected object (X=right/left, Y=up/down, Z=distance in meters)
 - Stable per-session object numbering with manual selection (digit keys)
-- Visual overlay: bounding boxes, number badges, position labels
+- Visual overlay: bounding boxes, number badges, position labels, crosshair, confidence bar
+- Proximity warning: box turns orange and shows CLOSE label when object is within threshold distance
+- HUD: live FPS counter, object count, top-down position map (bottom-left corner)
 - Throttled terminal output (once per second) for position logging
 
 ## Requirements
@@ -58,13 +60,16 @@ This steps through each parameter, shows the current value and valid options, an
 | `detection_model` | `MULTI_CLASS_BOX_ACCURATE` | `MULTI_CLASS_BOX_FAST` `MULTI_CLASS_BOX_MEDIUM` `MULTI_CLASS_BOX_ACCURATE` | Detection model. FAST = highest FPS, ACCURATE = best quality. |
 | `detection_confidence_threshold` | `40` | `0`–`100` | Minimum confidence to report a detection. Lower catches more objects but increases false positives. |
 | `object_class` | `FRUIT_VEGETABLE` | `PERSON` `VEHICLE` `BAG` `ANIMAL` `ELECTRONICS` `FRUIT_VEGETABLE` `SPORT` | Object class to track. `FRUIT_VEGETABLE` covers fruit, vegetables, and similar round objects. |
+| `proximity_warning_threshold` | `1.0` | positive number | Distance (in `coordinate_units`) below which a box turns orange and shows a CLOSE label. |
 
 ## Architecture
 
 ```
-main.py                  — camera init, main loop, keypress handling, terminal output
+main.py                  — camera init, main loop, FPS tracking, keypress handling, terminal output
+config.py                — config loading, enum mappings, interactive --configure prompt
+config.json              — user-editable parameters
 detector/zed_detector.py — ZED SDK wrapper, returns list[TargetPosition]
-visualizer/visualizer.py — draws boxes, number badges, and position labels onto frames
+visualizer/visualizer.py — draws per-object overlays, HUD (FPS, count, map), proximity warnings
 ```
 
 ## Hardware
