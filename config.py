@@ -60,6 +60,69 @@ _DEFAULTS = {
 }
 
 
+# Drives the --configure prompt: (key, description, valid options or None for free integer 0-100)
+_CONFIGURE_FIELDS = [
+    ("depth_mode",                    "Depth estimation algorithm",            list(DEPTH_MODE_MAP)),
+    ("coordinate_units",              "Unit for X/Y/Z position output",        list(UNIT_MAP)),
+    ("sdk_verbose",                   "ZED SDK logging (0=silent, 1=verbose)", ["0", "1"]),
+    ("enable_tracking",               "Stable object IDs across frames",       ["true", "false"]),
+    ("enable_segmentation",           "Per-object pixel masks (costs CPU)",    ["true", "false"]),
+    ("detection_model",               "Detection model quality vs. speed",     list(DETECTION_MODEL_MAP)),
+    ("detection_confidence_threshold","Minimum detection confidence",          None),
+    ("object_class",                  "Object class to track",                 list(OBJECT_CLASS_MAP)),
+]
+
+
+def run_configure(path="config.json"):
+    raw = dict(_DEFAULTS)
+    if os.path.exists(path):
+        with open(path) as f:
+            raw.update(json.load(f))
+
+    print("\n=== ZED Object Tracker — Configuration ===")
+    print("Press Enter to keep the current value.\n")
+
+    for key, desc, valid in _CONFIGURE_FIELDS:
+        current = raw[key]
+        display = str(current).lower() if isinstance(current, bool) else str(current)
+
+        print(f"{key}  ({desc})")
+        if valid is not None:
+            print(f"  Options : {', '.join(valid)}")
+        else:
+            print(f"  Range   : 0-100")
+        print(f"  Current : {display}")
+
+        while True:
+            val = input("  > ").strip()
+            if val == "":
+                break
+            if valid is not None:
+                if val not in valid:
+                    print(f"  Invalid. Choose from: {', '.join(valid)}")
+                    continue
+            else:
+                try:
+                    v = int(val)
+                    if not (0 <= v <= 100):
+                        raise ValueError
+                except ValueError:
+                    print("  Invalid. Enter an integer between 0 and 100.")
+                    continue
+            raw[key] = val
+            break
+        print()
+
+    raw["sdk_verbose"] = int(raw["sdk_verbose"])
+    raw["enable_tracking"] = str(raw["enable_tracking"]).lower() == "true"
+    raw["enable_segmentation"] = str(raw["enable_segmentation"]).lower() == "true"
+    raw["detection_confidence_threshold"] = int(raw["detection_confidence_threshold"])
+
+    with open(path, "w") as f:
+        json.dump(raw, f, indent=4)
+    print(f"Saved to {path}.\n")
+
+
 def load_config(path="config.json"):
     cfg = dict(_DEFAULTS)
     if os.path.exists(path):

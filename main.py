@@ -1,10 +1,11 @@
 import sys
+import argparse
 import time
 from datetime import datetime
 import cv2
 import pyzed.sl as sl
 import numpy as np
-from config import load_config
+from config import load_config, run_configure
 from detector.zed_detector import ZEDDetector
 from detector.zed_detector import TargetPosition
 from visualizer.visualizer import draw
@@ -30,6 +31,12 @@ def format_terminal_output(all_targets: list[TargetPosition], id_to_num: dict[in
     return "\n".join(lines)
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--configure", action="store_true", help="Edit config.json interactively before starting")
+    args = parser.parse_args()
+    if args.configure:
+        run_configure()
+
     cfg = load_config()
 
     # Create a Camera object
