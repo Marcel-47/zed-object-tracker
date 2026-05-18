@@ -4,6 +4,7 @@ from datetime import datetime
 import cv2
 import pyzed.sl as sl
 import numpy as np
+from config import load_config
 from detector.zed_detector import ZEDDetector
 from detector.zed_detector import TargetPosition
 from visualizer.visualizer import draw
@@ -29,14 +30,16 @@ def format_terminal_output(all_targets: list[TargetPosition], id_to_num: dict[in
     return "\n".join(lines)
 
 def main():
+    cfg = load_config()
+
     # Create a Camera object
     zed = sl.Camera()
 
     # Create a InitParameters object and set configuration parameters
     init_params = sl.InitParameters()
-    init_params.depth_mode = sl.DEPTH_MODE.NEURAL
-    init_params.coordinate_units = sl.UNIT.METER
-    init_params.sdk_verbose = 1
+    init_params.depth_mode = cfg["depth_mode"]
+    init_params.coordinate_units = cfg["coordinate_units"]
+    init_params.sdk_verbose = cfg["sdk_verbose"]
 
     # Open the camera
     err = zed.open(init_params)
@@ -45,10 +48,10 @@ def main():
         exit()
 
     obj_param = sl.ObjectDetectionParameters()
-    obj_param.enable_tracking = True       # keeps object IDs stable across frames
-    obj_param.enable_segmentation = False   # provides per-object pixel masks (disable to reduce CPU load)
+    obj_param.enable_tracking = cfg["enable_tracking"]       # keeps object IDs stable across frames
+    obj_param.enable_segmentation = cfg["enable_segmentation"]   # provides per-object pixel masks (disable to reduce CPU load)
     # MEDIUM balances speed and accuracy; switch to MULTI_CLASS_BOX_ACCURATE for better detection at the cost of performance and speed
-    obj_param.detection_model = sl.OBJECT_DETECTION_MODEL.MULTI_CLASS_BOX_ACCURATE
+    obj_param.detection_model = cfg["detection_model"]
 
     if obj_param.enable_tracking:
         positional_tracking_param = sl.PositionalTrackingParameters()
@@ -64,13 +67,13 @@ def main():
         zed.close()
         exit()
 
-    detector = ZEDDetector()
+    detector = ZEDDetector(cfg["object_class"])
     image = sl.Mat()
     objects = sl.Objects()
     obj_runtime_param = sl.ObjectDetectionRuntimeParameters()
     # Minimum confidence (0–100) for a detection to be reported.
     # Lower values catch more objects but increase false positives; raise to filter noise.
-    obj_runtime_param.detection_confidence_threshold = 40  # Adjust based on your environment and needs - lower for more detections, higher to reduce false positives
+    obj_runtime_param.detection_confidence_threshold = cfg["detection_confidence_threshold"]  # Adjust based on your environment and needs - lower for more detections, higher to reduce false positives
     zed.set_object_detection_runtime_parameters(obj_runtime_param)  # can be updated mid-run
 
     print("Tracking started. Press a number key to select an object, '0' to deselect, 'q' to quit.")
