@@ -46,11 +46,11 @@ worth monitoring if many objects are on screen simultaneously.
 
 ## Architecture overview
 ```
-main.py                  — camera init, main loop, keypress handling, terminal output
+main.py                  — camera init, main loop, FPS tracking, keypress handling, terminal output
 config.py                — config loading, enum mappings, interactive --configure prompt
 config.json              — user-editable parameters (edit directly or via --configure)
 detector/zed_detector.py — wraps ZED SDK object detection, returns list[TargetPosition]
-visualizer/visualizer.py — draws boxes, number badges, and position labels onto frames
+visualizer/visualizer.py — draws per-object overlays, HUD (FPS, count, map), proximity warnings
 ```
 
 ### Key data type
@@ -86,3 +86,5 @@ Planned next CLI feature: `--set key=value` session overrides (e.g.
   FRUIT_VEGETABLE. Raise the threshold rather than adding a size filter.
 - `cv2.LINE_AA` on text inside the object loop caused a significant FPS drop on Jetson.
 - Printing multiple lines to stdout every frame blocks the loop noticeably on Jetson.
+- The ZED SDK emits NaN coordinates for objects being tracked but not yet localized.
+  These are filtered out in `zed_detector.py` before reaching the rest of the pipeline.
