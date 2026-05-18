@@ -57,7 +57,7 @@ This steps through each parameter, shows the current value and valid options, an
 | `enable_segmentation` | `false` | `true` `false` | Per-object pixel masks. Disable to reduce CPU load. |
 | `detection_model` | `MULTI_CLASS_BOX_ACCURATE` | `MULTI_CLASS_BOX_FAST` `MULTI_CLASS_BOX_MEDIUM` `MULTI_CLASS_BOX_ACCURATE` | Detection model. FAST = highest FPS, ACCURATE = best quality. |
 | `detection_confidence_threshold` | `40` | `0`–`100` | Minimum confidence to report a detection. Lower catches more objects but increases false positives. |
-| `object_class` | `FRUIT_VEGETABLE` | `PERSON` `VEHICLE` `BAG` `ANIMAL` `ELECTRONICS` `FRUIT_VEGETABLE` `SPORT` | Object class to track. Tennis balls are classified as `FRUIT_VEGETABLE`. |
+| `object_class` | `FRUIT_VEGETABLE` | `PERSON` `VEHICLE` `BAG` `ANIMAL` `ELECTRONICS` `FRUIT_VEGETABLE` `SPORT` | Object class to track. `FRUIT_VEGETABLE` covers fruit, vegetables, and similar round objects. |
 
 ## Architecture
 
