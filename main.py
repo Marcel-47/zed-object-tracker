@@ -113,7 +113,10 @@ def main():
             if gone not in current_ids:
                 del id_to_num[gone]
         for t in all_targets:
-            if t.track_id not in id_to_num:config.json
+            if t.track_id not in id_to_num:
+                used = set(id_to_num.values())
+                id_to_num[t.track_id] = next(n for n in range(1, len(used) + 2) if n not in used)
+        if selected_num not in id_to_num.values():
             selected_num = None
 
         annotated = draw(frame, all_targets, id_to_num, selected_num,
