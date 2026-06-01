@@ -62,16 +62,6 @@ This steps through each parameter, shows the current value and valid options, an
 | `proximity_warning_threshold` | `1.0` | positive number | Distance (in `coordinate_units`) below which a box turns orange and shows a CLOSE label. |
 | `sdk_verbose` | `1` | `0` `1` | ZED SDK log output. `0` = silent, `1` = verbose. |
 
-## Architecture
-
-```
-main.py                  — camera init, main loop, FPS tracking, keypress handling, terminal output
-config.py                — config loading, enum mappings, interactive --configure prompt
-config.json              — user-editable parameters
-detector/zed_detector.py — ZED SDK wrapper, returns list[TargetPosition]
-visualizer/visualizer.py — draws per-object overlays, HUD (FPS, count, map), proximity warnings
-```
-
 ## Hardware
 
 Runs on a Jetson (ARM). Per-frame allocations and rendering calls are treated as expensive.
