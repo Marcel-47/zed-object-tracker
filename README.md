@@ -50,17 +50,17 @@ python main.py --configure
 
 This steps through each parameter, shows the current value and valid options, and saves the result to `config.json`. Press Enter to keep the current value for any parameter.
 
-| Key | Default | Valid values | Description |
-|-----|---------|--------------|-------------|
-| `object_class` | `FRUIT_VEGETABLE` | `PERSON` `VEHICLE` `BAG` `ANIMAL` `ELECTRONICS` `FRUIT_VEGETABLE` `SPORT` | Object class to track. `FRUIT_VEGETABLE` covers fruit, vegetables, and similar round objects. |
-| `detection_model` | `MULTI_CLASS_BOX_ACCURATE` | `MULTI_CLASS_BOX_FAST` `MULTI_CLASS_BOX_MEDIUM` `MULTI_CLASS_BOX_ACCURATE` | Detection model. FAST = highest FPS, ACCURATE = best quality. |
-| `depth_mode` | `NEURAL` | `PERFORMANCE` `QUALITY` `ULTRA` `NEURAL` `NEURAL_PLUS` | Depth estimation algorithm. Higher quality costs more compute. |
-| `detection_confidence_threshold` | `40` | `0`–`100` | Minimum confidence to report a detection. Lower catches more objects but increases false positives. |
-| `coordinate_units` | `METER` | `MILLIMETER` `CENTIMETER` `METER` `INCH` `FOOT` | Unit for all X/Y/Z position values. |
-| `enable_tracking` | `true` | `true` `false` | Keeps object IDs stable across frames. Disable to reduce CPU load. |
-| `enable_segmentation` | `false` | `true` `false` | Per-object pixel masks. Disable to reduce CPU load. |
-| `proximity_warning_threshold` | `1.0` | positive number | Distance (in `coordinate_units`) below which a box turns orange and shows a CLOSE label. |
-| `sdk_verbose` | `1` | `0` `1` | ZED SDK log output. `0` = silent, `1` = verbose. |
+| Key | Valid values | Description |
+|-----|--------------|-------------|
+| `object_class` | `PERSON` `VEHICLE` `BAG` `ANIMAL` `ELECTRONICS` `FRUIT_VEGETABLE` `SPORT` | Object class to track. `FRUIT_VEGETABLE` covers fruit, vegetables, and similar round objects. |
+| `detection_model` | `MULTI_CLASS_BOX_FAST` `MULTI_CLASS_BOX_MEDIUM` `MULTI_CLASS_BOX_ACCURATE` | Detection model. FAST = highest FPS, ACCURATE = best quality. |
+| `depth_mode` | `PERFORMANCE` `QUALITY` `ULTRA` `NEURAL` `NEURAL_PLUS` | Depth estimation algorithm. Higher quality costs more compute. |
+| `detection_confidence_threshold` | `0`–`100` | Minimum confidence to report a detection. Lower catches more objects but increases false positives. |
+| `coordinate_units` | `MILLIMETER` `CENTIMETER` `METER` `INCH` `FOOT` | Unit for all X/Y/Z position values. |
+| `enable_tracking` | `true` `false` | Keeps object IDs stable across frames. Disable to reduce CPU load. |
+| `enable_segmentation` | `true` `false` | Per-object pixel masks. Disable to reduce CPU load. |
+| `proximity_warning_threshold` | positive number | Distance (in `coordinate_units`) below which a box turns orange and shows a CLOSE label. |
+| `sdk_verbose` | `0` `1` | ZED SDK log output. `0` = silent, `1` = verbose. |
 
 ## Hardware
 
