@@ -28,7 +28,7 @@ Real-time object detection and tracking using a ZED stereo camera. Detects objec
 python main.py
 ```
 
-The camera initialises, loads the object detection module, and begins processing frames.
+The camera initialises, loads the object detection module, and begins processing frames. All based on the configurations saved in config.json. See config_example.json.
 
 | Key | Action |
 |-----|--------|
