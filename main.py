@@ -87,7 +87,6 @@ def main():
     print("Tracking started. Press a number key to select an object, '0' to deselect, 'q' to quit.")
 
     id_to_num: dict[int, int] = {}
-    next_num = 1
     selected_num: int | None = None
     last_print_time = 0.0
     frame_times: deque = deque(maxlen=30)
@@ -109,10 +108,13 @@ def main():
         frame = cv2.cvtColor(image.get_data(), cv2.COLOR_BGRA2BGR)
         all_targets = detector.get_all_target_positions(frame, objects)
 
+        current_ids = {t.track_id for t in all_targets}
+        for gone in list(id_to_num):
+            if gone not in current_ids:
+                del id_to_num[gone]
         for t in all_targets:
-            if t.track_id not in id_to_num:
-                id_to_num[t.track_id] = next_num
-                next_num += 1
+            if t.track_id not in id_to_num:config.json
+            selected_num = None
 
         annotated = draw(frame, all_targets, id_to_num, selected_num,
                          fps=fps, proximity_threshold=cfg["proximity_warning_threshold"])
