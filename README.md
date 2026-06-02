@@ -2,16 +2,18 @@
 
 > **Work in progress.** This project is under active development.
 
-Real-time object detection and tracking using a ZED stereo camera. Detects objects in 3D space and overlays bounding boxes with position data (X/Y/Z in meters) on the live camera feed. Intended as the perception layer for a robotic arm controller.
+Real-time object detection and tracking using a ZED stereo camera. Detects objects in 3D space and overlays bounding boxes with position data (X/Y/Z in meters) on the live camera feed.
 
 ## Features
 
 - Live object detection using the ZED SDK
 - 3D position output per detected object (X=right/left, Y=up/down, Z=distance in meters)
-- Stable per-session object numbering with manual selection (digit keys)
-- Visual overlay: bounding boxes, number badges, position labels, crosshair, confidence bar
-- Proximity warning: box turns orange and shows CLOSE label when object is within threshold distance
-- HUD: live FPS counter, object count, top-down position map (bottom-left corner)
+- Stable per-session object numbering with multi-digit keyboard selection
+- Auto-select mode: continuously highlights the closest object by depth
+- Visual overlay: bounding boxes, number badges, confidence percentages, position labels, crosshair
+- Camera center crosshair marking the X=0, Y=0 origin point
+- HUD: live FPS counter, object count, auto-select indicator, top-down position map (bottom-left corner)
+- Overlay toggle: hide all text labels while keeping bounding boxes visible
 - Throttled terminal output (once per second) for position logging
 
 ## Requirements
@@ -32,8 +34,13 @@ The camera initialises, loads the object detection module, and begins processing
 
 | Key | Action |
 |-----|--------|
-| `1`–`9` | Select object by display number (highlights red) |
-| `0` | Deselect |
+| `0`–`9` | Type a display number to select an object |
+| `Enter` | Confirm selection (highlights object red) |
+| `Backspace` | Delete last typed digit |
+| `Esc` | Cancel input without changing selection |
+| `c` | Toggle auto-select mode (always selects closest object) |
+| `h` | Toggle overlay visibility (hides text labels, keeps bounding boxes) |
+| `r` | Reset all object numbering and clear selection |
 | `q` | Quit |
 
 Detected objects are filtered to the configured class. All tunable parameters are set in `config.json` — see [Configuration](#configuration) below.
@@ -59,7 +66,7 @@ This steps through each parameter, shows the current value and valid options, an
 | `coordinate_units` | `MILLIMETER` `CENTIMETER` `METER` `INCH` `FOOT` | Unit for all X/Y/Z position values. |
 | `enable_tracking` | `true` `false` | Keeps object IDs stable across frames. Disable to reduce CPU load. |
 | `enable_segmentation` | `true` `false` | Per-object pixel masks. Disable to reduce CPU load. |
-| `proximity_warning_threshold` | positive number | Distance (in `coordinate_units`) below which a box turns orange and shows a CLOSE label. |
+| `proximity_warning_threshold` | positive number | Distance threshold (in `coordinate_units`) reserved for future proximity features. |
 | `sdk_verbose` | `0` `1` | ZED SDK log output. `0` = silent, `1` = verbose. |
 
 ## Hardware
