@@ -19,7 +19,7 @@ def _pos_label(target) -> str:
     return f"X:{target.x:+.2f}m ({x_dir})  Y:{target.y:+.2f}m ({y_dir})  Z:{target.z:+.2f}m ({z_dir})"
 
 
-def draw(frame, all_targets, id_to_num: dict, selected_num: int | None, fps=None):
+def draw(frame, all_targets, id_to_num: dict, selected_num: int | None, fps=None, input_buffer: str = ""):
     out = frame.copy()
     frame_h, frame_w = out.shape[:2]
 
@@ -61,6 +61,9 @@ def draw(frame, all_targets, id_to_num: dict, selected_num: int | None, fps=None
         cv2.putText(out, f"FPS: {fps:.1f}", (10, hud_y), FONT, 0.55, (255, 255, 255), 1)
         hud_y += 22
     cv2.putText(out, f"Objects: {len(all_targets)}", (10, hud_y), FONT, 0.55, (255, 255, 255), 1)
+    hud_y += 22
+    if input_buffer:
+        cv2.putText(out, f"> {input_buffer}_", (10, hud_y), FONT, 0.55, (255, 255, 0), 1)
 
     # --- Top-down position map (bottom-left) ---
     mx, my = 10, frame_h - _MAP_H - 10
@@ -79,5 +82,13 @@ def draw(frame, all_targets, id_to_num: dict, selected_num: int | None, fps=None
         dot_x = max(mx + 3, min(mx + _MAP_W - 3, dot_x))
         dot_y = max(my + 3, min(my + _MAP_H - 3, dot_y))
         cv2.circle(out, (dot_x, dot_y), 4, dot_color, -1)
+
+    # --- Coordinate axis legend (bottom-right) ---
+    legend_lines = ["X: right / left", "Y: up / down", "Z: away / towards"]
+    legend_y = frame_h - 10
+    for line in reversed(legend_lines):
+        (lw, _), _ = cv2.getTextSize(line, FONT, 0.4, 1)
+        cv2.putText(out, line, (frame_w - lw - 10, legend_y), FONT, 0.4, (150, 150, 150), 1)
+        legend_y -= 16
 
     return out
