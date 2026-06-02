@@ -121,7 +121,7 @@ def main():
             selected_num = None
 
         annotated = draw(frame, all_targets, id_to_num, selected_num, fps=fps, input_buffer=input_buffer)
-        label = "Type number + Enter to select | '0' + Enter to deselect | Esc to cancel | 'q' to quit"
+        label = "Type number + Enter to select | '0' + Enter to deselect | Esc to cancel | 'r' to reset | 'q' to quit"
         (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
         cv2.putText(annotated, label, (annotated.shape[1] - w - 10, h + 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
@@ -139,6 +139,10 @@ def main():
                 selected_num = None if n == 0 else n
                 input_buffer = ""
         elif key == 27:  # Escape
+            input_buffer = ""
+        elif key == ord('r'):
+            id_to_num.clear()
+            selected_num = None
             input_buffer = ""
         elif key == 8:  # Backspace
             input_buffer = input_buffer[:-1]
