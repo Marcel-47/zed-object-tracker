@@ -92,6 +92,8 @@ def main():
     show_overlay: bool = True
     auto_select: bool = False
     last_print_time = 0.0
+    hint_label = "Type number + Enter to select | '0' + Enter to deselect | Esc to cancel | 'r' to reset | 'h' overlay | 'c' auto-select | 'q' to quit"
+    (hint_w, hint_h), _ = cv2.getTextSize(hint_label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
     frame_times: deque = deque(maxlen=30)
     last_frame_time = time.monotonic()
 
@@ -127,9 +129,7 @@ def main():
             selected_num = id_to_num.get(closest.track_id)
 
         annotated = draw(frame, all_targets, id_to_num, selected_num, fps=fps, input_buffer=input_buffer, show_overlay=show_overlay, auto_select=auto_select)
-        label = "Type number + Enter to select | '0' + Enter to deselect | Esc to cancel | 'r' to reset | 'h' overlay | 'c' auto-select | 'q' to quit"
-        (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
-        cv2.putText(annotated, label, (annotated.shape[1] - w - 10, h + 10),
+        cv2.putText(annotated, hint_label, (annotated.shape[1] - hint_w - 10, hint_h + 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
         cv2.imshow("ZED Object Tracker", annotated)
         if now - last_print_time >= 1.0:
