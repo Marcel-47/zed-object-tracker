@@ -119,8 +119,7 @@ def main():
         if selected_num not in id_to_num.values():
             selected_num = None
 
-        annotated = draw(frame, all_targets, id_to_num, selected_num,
-                         fps=fps, proximity_threshold=cfg["proximity_warning_threshold"])
+        annotated = draw(frame, all_targets, id_to_num, selected_num, fps=fps)
         label = "Press number to select | '0' to deselect | 'q' to quit"
         (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
         cv2.putText(annotated, label, (annotated.shape[1] - w - 10, h + 10),
