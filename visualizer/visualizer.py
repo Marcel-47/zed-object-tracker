@@ -19,7 +19,7 @@ def _pos_label(target) -> str:
     return f"X:{target.x:+.2f}m ({x_dir})  Y:{target.y:+.2f}m ({y_dir})  Z:{target.z:+.2f}m ({z_dir})"
 
 
-def draw(frame, all_targets, id_to_num: dict, selected_num: int | None, fps=None, input_buffer: str = ""):
+def draw(frame, all_targets, id_to_num: dict, selected_num: int | None, fps=None, input_buffer: str = "", show_overlay: bool = True, auto_select: bool = False):
     out = frame.copy()
     frame_h, frame_w = out.shape[:2]
 
@@ -42,18 +42,19 @@ def draw(frame, all_targets, id_to_num: dict, selected_num: int | None, fps=None
             x1, y1, x2, y2 = target.bbox
             cv2.rectangle(out, (x1, y1), (x2, y2), color, 2)
 
-            # Number badge in the top-left corner of the box
-            num_label = f"#{num}" if num is not None else "?"
-            cv2.putText(out, num_label, (x1 + 4, y1 + 18), FONT, 0.6, color, 2)
+            if show_overlay:
+                # Number badge in the top-left corner of the box
+                num_label = f"#{num}" if num is not None else "?"
+                cv2.putText(out, num_label, (x1 + 4, y1 + 18), FONT, 0.6, color, 2)
 
-            # Confidence percentage in the top-right corner of the box
-            conf_label = f"{int(target.confidence * 100)}%"
-            (conf_w, _), _ = cv2.getTextSize(conf_label, FONT, 0.6, 2)
-            cv2.putText(out, conf_label, (x2 - conf_w - 4, y1 + 18), FONT, 0.6, color, 2)
+                # Confidence percentage in the top-right corner of the box
+                conf_label = f"{int(target.confidence * 100)}%"
+                (conf_w, _), _ = cv2.getTextSize(conf_label, FONT, 0.6, 2)
+                cv2.putText(out, conf_label, (x2 - conf_w - 4, y1 + 18), FONT, 0.6, color, 2)
 
-            # Position info just above the box
-            text_y = max(y1 - 8, 15)
-            cv2.putText(out, _pos_label(target), (x1, text_y), FONT, 0.45, color, 1)
+                # Position info just above the box
+                text_y = max(y1 - 8, 15)
+                cv2.putText(out, _pos_label(target), (x1, text_y), FONT, 0.45, color, 1)
 
             # Crosshair at bbox center
             cx, cy = (x1 + x2) // 2, (y1 + y2) // 2
@@ -67,6 +68,9 @@ def draw(frame, all_targets, id_to_num: dict, selected_num: int | None, fps=None
         hud_y += 22
     cv2.putText(out, f"Objects: {len(all_targets)}", (10, hud_y), FONT, 0.55, (255, 255, 255), 1)
     hud_y += 22
+    if auto_select:
+        cv2.putText(out, "AUTO", (10, hud_y), FONT, 0.55, (0, 200, 255), 1)
+        hud_y += 22
     if input_buffer:
         cv2.putText(out, f"> {input_buffer}_", (10, hud_y), FONT, 0.55, (255, 255, 0), 1)
 

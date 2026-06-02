@@ -89,6 +89,8 @@ def main():
     id_to_num: dict[int, int] = {}
     selected_num: int | None = None
     input_buffer: str = ""
+    show_overlay: bool = True
+    auto_select: bool = False
     last_print_time = 0.0
     frame_times: deque = deque(maxlen=30)
     last_frame_time = time.monotonic()
@@ -120,8 +122,12 @@ def main():
         if selected_num not in id_to_num.values():
             selected_num = None
 
-        annotated = draw(frame, all_targets, id_to_num, selected_num, fps=fps, input_buffer=input_buffer)
-        label = "Type number + Enter to select | '0' + Enter to deselect | Esc to cancel | 'r' to reset | 'q' to quit"
+        if auto_select and all_targets:
+            closest = min(all_targets, key=lambda t: t.z)
+            selected_num = id_to_num.get(closest.track_id)
+
+        annotated = draw(frame, all_targets, id_to_num, selected_num, fps=fps, input_buffer=input_buffer, show_overlay=show_overlay, auto_select=auto_select)
+        label = "Type number + Enter to select | '0' + Enter to deselect | Esc to cancel | 'r' to reset | 'h' overlay | 'c' auto-select | 'q' to quit"
         (w, h), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
         cv2.putText(annotated, label, (annotated.shape[1] - w - 10, h + 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
@@ -138,12 +144,17 @@ def main():
                 n = int(input_buffer)
                 selected_num = None if n == 0 else n
                 input_buffer = ""
+                auto_select = False
         elif key == 27:  # Escape
             input_buffer = ""
         elif key == ord('r'):
             id_to_num.clear()
             selected_num = None
             input_buffer = ""
+        elif key == ord('h'):
+            show_overlay = not show_overlay
+        elif key == ord('c'):
+            auto_select = not auto_select
         elif key == 8:  # Backspace
             input_buffer = input_buffer[:-1]
         elif ord('0') <= key <= ord('9'):
