@@ -23,6 +23,11 @@ def draw(frame, all_targets, id_to_num: dict, selected_num: int | None, fps=None
     out = frame.copy()
     frame_h, frame_w = out.shape[:2]
 
+    # --- Camera center crosshair (X=0, Y=0) ---
+    cx, cy = frame_w // 2, frame_h // 2
+    cv2.line(out, (cx - 20, cy), (cx + 20, cy), (55, 55, 55), 1)
+    cv2.line(out, (cx, cy - 20), (cx, cy + 20), (55, 55, 55), 1)
+
     # --- Per-object overlays ---
     if not all_targets:
         msg = "No objects detected"
