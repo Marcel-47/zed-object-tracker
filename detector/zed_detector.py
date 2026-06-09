@@ -11,12 +11,12 @@ import pyzed.sl as sl
 # Each entry is a list of (h_lo, s_lo, v_lo, h_hi, s_hi, v_hi) tuples.
 # Red needs two entries because hue wraps around at 0/179 on the color wheel.
 _COLOR_RANGES = {
+    "blue":   [(100, 80, 50, 130, 255, 255)],
     "red":    [(0,   80, 50,  10, 255, 255),
                (160, 80, 50, 179, 255, 255)],
-    "orange": [(10,  80, 50,  25, 255, 255)],
-    "yellow": [(25,  80, 50,  35, 255, 255)],
     "green":  [(35,  80, 50,  85, 255, 255)],
-    "blue":   [(100, 80, 50, 130, 255, 255)],
+    "yellow": [(25,  80, 50,  35, 255, 255)],
+    "orange": [(10,  80, 50,  25, 255, 255)],
     "purple": [(130, 80, 50, 160, 255, 255)],
 }
 
