@@ -155,6 +155,9 @@ def main():
             id_to_num.clear()
             selected_num = None
             input_buffer = ""
+            show_overlay = True
+            auto_select = False
+            color_filter_idx = 0
         elif key == ord('h'):
             show_overlay = not show_overlay
         elif key == ord('f'):
