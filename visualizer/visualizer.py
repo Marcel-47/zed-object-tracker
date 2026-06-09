@@ -19,7 +19,7 @@ def _pos_label(target) -> str:
     return f"X:{target.x:+.2f}m ({x_dir})  Y:{target.y:+.2f}m ({y_dir})  Z:{target.z:+.2f}m ({z_dir})"
 
 
-def draw(frame, all_targets, id_to_num: dict, selected_num: int | None, fps=None, input_buffer: str = "", show_overlay: bool = True, auto_select: bool = False):
+def draw(frame, all_targets, id_to_num: dict, selected_num: int | None, fps=None, input_buffer: str = "", show_overlay: bool = True, auto_select: bool = False, color_filter: str = ""):
     out = frame.copy()
     frame_h, frame_w = out.shape[:2]
 
@@ -70,6 +70,9 @@ def draw(frame, all_targets, id_to_num: dict, selected_num: int | None, fps=None
     hud_y += 22
     if auto_select:
         cv2.putText(out, "AUTO", (10, hud_y), FONT, 0.55, (0, 200, 255), 1)
+        hud_y += 22
+    if color_filter:
+        cv2.putText(out, f"COLOR: {color_filter.upper()}", (10, hud_y), FONT, 0.55, (255, 255, 255), 1)
         hud_y += 22
     if input_buffer:
         cv2.putText(out, f"> {input_buffer}_", (10, hud_y), FONT, 0.55, (255, 255, 0), 1)

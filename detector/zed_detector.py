@@ -3,7 +3,22 @@ from dataclasses import dataclass
 from typing import Any
 import math
 import numpy as np
+import cv2
 import pyzed.sl as sl
+
+
+# HSV color ranges for the color filter.
+# Each entry is a list of (h_lo, s_lo, v_lo, h_hi, s_hi, v_hi) tuples.
+# Red needs two entries because hue wraps around at 0/179 on the color wheel.
+_COLOR_RANGES = {
+    "red":    [(0,   80, 50,  10, 255, 255),
+               (160, 80, 50, 179, 255, 255)],
+    "orange": [(10,  80, 50,  25, 255, 255)],
+    "yellow": [(25,  80, 50,  35, 255, 255)],
+    "green":  [(35,  80, 50,  85, 255, 255)],
+    "blue":   [(100, 80, 50, 130, 255, 255)],
+    "purple": [(130, 80, 50, 160, 255, 255)],
+}
 
 
 @dataclass
@@ -43,12 +58,16 @@ class ZEDDetector(Detector):
     - Detection model accuracy vs. speed: set in main.py via
       obj_param.detection_model. Use MULTI_CLASS_BOX_ACCURATE for better accuracy
       or MULTI_CLASS_BOX_MEDIUM or MULTI_CLASS_BOX_FAST for higher frame rate.
+    - Color filter: set self.color_filter to a key from _COLOR_RANGES at runtime.
+      Objects whose bounding box does not contain enough of that color are discarded.
     """
 
-    def __init__(self, object_class=sl.OBJECT_CLASS.FRUIT_VEGETABLE):
+    def __init__(self, object_class=sl.OBJECT_CLASS.FRUIT_VEGETABLE, color_match_threshold: float = 0.15):
         self.object_class = object_class
+        self.color_filter: str = ""
+        self.color_match_threshold = color_match_threshold
 
-    def get_all_target_positions(self, _frame, objects) -> list[TargetPosition]:
+    def get_all_target_positions(self, frame, objects) -> list[TargetPosition]:
         results = []
         for obj in objects.object_list:
             if obj.label != self.object_class:
@@ -62,5 +81,16 @@ class ZEDDetector(Detector):
             y1 = int(bbox_corners[0][1])
             x2 = int(bbox_corners[2][0])
             y2 = int(bbox_corners[2][1])
+
+            if self.color_filter in _COLOR_RANGES:
+                region = frame[y1:y2, x1:x2]
+                if region.size > 0:
+                    hsv = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)
+                    combined = np.zeros(hsv.shape[:2], dtype=np.uint8)
+                    for (hl, sl_, vl, hh, sh, vh) in _COLOR_RANGES[self.color_filter]:
+                        combined = cv2.bitwise_or(combined, cv2.inRange(hsv, (hl, sl_, vl), (hh, sh, vh)))
+                    if combined.mean() / 255 < self.color_match_threshold:
+                        continue
+
             results.append(TargetPosition(x=x, y=y, z=z, confidence=confidence, bbox=(x1, y1, x2, y2), track_id=int(obj.id)))
         return results

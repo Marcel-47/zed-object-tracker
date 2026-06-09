@@ -86,13 +86,16 @@ def main():
 
     print("Tracking started. Press a number key to select an object, '0' to deselect, 'q' to quit.")
 
+    COLOR_CYCLE = ["", "blue", "red", "green", "yellow", "orange", "purple"]
+
     id_to_num: dict[int, int] = {}
     selected_num: int | None = None
     input_buffer: str = ""
     show_overlay: bool = True
     auto_select: bool = False
+    color_filter_idx: int = 0
     last_print_time = 0.0
-    hint_label = "Type number + Enter to select | '0' + Enter to deselect | Esc to cancel | 'r' to reset | 'h' overlay | 'c' auto-select | 'q' to quit"
+    hint_label = "Type number + Enter to select | '0' + Enter to deselect | Esc to cancel | 'r' to reset | 'h' overlay | 'c' auto-select | 'f' color filter | 'q' to quit"
     (hint_w, hint_h), _ = cv2.getTextSize(hint_label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
     frame_times: deque = deque(maxlen=30)
     last_frame_time = time.monotonic()
@@ -111,6 +114,7 @@ def main():
         zed.retrieve_objects(objects, obj_runtime_param)
 
         frame = cv2.cvtColor(image.get_data(), cv2.COLOR_BGRA2BGR)
+        detector.color_filter = COLOR_CYCLE[color_filter_idx]
         all_targets = detector.get_all_target_positions(frame, objects)
 
         current_ids = {t.track_id for t in all_targets}
@@ -128,7 +132,7 @@ def main():
             closest = min(all_targets, key=lambda t: t.z)
             selected_num = id_to_num.get(closest.track_id)
 
-        annotated = draw(frame, all_targets, id_to_num, selected_num, fps=fps, input_buffer=input_buffer, show_overlay=show_overlay, auto_select=auto_select)
+        annotated = draw(frame, all_targets, id_to_num, selected_num, fps=fps, input_buffer=input_buffer, show_overlay=show_overlay, auto_select=auto_select, color_filter=COLOR_CYCLE[color_filter_idx])
         cv2.putText(annotated, hint_label, (annotated.shape[1] - hint_w - 10, hint_h + 10),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
         cv2.imshow("ZED Object Tracker", annotated)
@@ -153,6 +157,8 @@ def main():
             input_buffer = ""
         elif key == ord('h'):
             show_overlay = not show_overlay
+        elif key == ord('f'):
+            color_filter_idx = (color_filter_idx + 1) % len(COLOR_CYCLE)
         elif key == ord('c'):
             auto_select = not auto_select
         elif key == 8:  # Backspace
