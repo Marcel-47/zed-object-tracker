@@ -1,7 +1,5 @@
 # zed-object-tracker
 
-> **Work in progress.** This project is under active development.
-
 Real-time object detection and tracking using a ZED stereo camera. Detects objects in 3D space and overlays bounding boxes with position data (X/Y/Z in meters) on the live camera feed.
 
 ## Features
