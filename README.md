@@ -1,11 +1,11 @@
 # zed-object-tracker
 
-Real-time object detection and tracking using a ZED stereo camera. Detects objects in 3D space and overlays bounding boxes with position data (X/Y/Z in meters) on the live camera feed.
+Real-time object detection and tracking using a ZED stereo camera. Detects objects in 3D space and overlays bounding boxes with position data (X/Y/Z in the unit set by `coordinate_units`, meters by default) on the live camera feed.
 
 ## Features
 
 - Live object detection using the ZED SDK
-- 3D position output per detected object (X=right/left, Y=up/down, Z=distance in meters)
+- 3D position output per detected object (X=right/left, Y=up/down, Z=distance), reported in the unit set by `coordinate_units` (meters by default)
 - Stable per-session object numbering with multi-digit keyboard selection
 - Auto-select mode: continuously highlights the closest object by depth
 - Color filter: cycle through color presets to keep only objects whose bounding box contains enough of that color
