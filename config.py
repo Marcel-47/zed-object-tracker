@@ -39,6 +39,26 @@ UNIT_MAP = {
     "FOOT":       sl.UNIT.FOOT,
 }
 
+# Short label printed after each X/Y/Z value in the terminal and the UI.
+UNIT_LABEL_MAP = {
+    "MILLIMETER": "mm",
+    "CENTIMETER": "cm",
+    "METER":      "m",
+    "INCH":       "in",
+    "FOOT":       "ft",
+}
+
+# How many of the configured unit make up one meter. The top-down map is sized
+# in meters; this factor converts those meter ranges into the active unit so the
+# map covers the same physical area regardless of coordinate_units.
+UNIT_PER_METER = {
+    "MILLIMETER": 1000.0,
+    "CENTIMETER": 100.0,
+    "METER":      1.0,
+    "INCH":       39.3700787,
+    "FOOT":       3.2808399,
+}
+
 # Valid values for "detection_model" in config.json.
 # FAST:     highest FPS, lowest accuracy — use on heavily load-limited hardware
 # MEDIUM:   balanced speed and accuracy
@@ -160,6 +180,8 @@ def load_config(path="config.json"):
     return {
         "depth_mode":                    DEPTH_MODE_MAP[cfg["depth_mode"]],
         "coordinate_units":              UNIT_MAP[cfg["coordinate_units"]],
+        "coordinate_unit_label":         UNIT_LABEL_MAP[cfg["coordinate_units"]],
+        "coordinate_unit_per_meter":     UNIT_PER_METER[cfg["coordinate_units"]],
         "sdk_verbose":                   int(cfg["sdk_verbose"]),
         "enable_tracking":               bool(cfg["enable_tracking"]),
         "enable_segmentation":           bool(cfg["enable_segmentation"]),

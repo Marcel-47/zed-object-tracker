@@ -12,7 +12,7 @@ from detector.zed_detector import TargetPosition
 from visualizer.visualizer import draw
 
 
-def format_terminal_output(all_targets: list[TargetPosition], id_to_num: dict[int, int], selected_num: int | None) -> str:
+def format_terminal_output(all_targets: list[TargetPosition], id_to_num: dict[int, int], selected_num: int | None, unit: str) -> str:
     ts = datetime.now().strftime("%H:%M:%S.%f")[:-3]
     if not all_targets:
         return f"[{ts}] No object detected"
@@ -25,9 +25,9 @@ def format_terminal_output(all_targets: list[TargetPosition], id_to_num: dict[in
         marker = " [selected]" if num == selected_num else ""
         lines.append(
             f"  #{num}{marker} | "
-            f"X: {t.x:+.2f}m ({x_label}) | "
-            f"Y: {t.y:+.2f}m ({y_label}) | "
-            f"Z: {t.z:+.2f}m ({z_label})"
+            f"X: {t.x:+.2f}{unit} ({x_label}) | "
+            f"Y: {t.y:+.2f}{unit} ({y_label}) | "
+            f"Z: {t.z:+.2f}{unit} ({z_label})"
         )
     return "\n".join(lines)
 
@@ -141,12 +141,12 @@ def main():
                 closest = min(all_targets, key=lambda t: t.z)
                 selected_num = id_to_num.get(closest.track_id)
 
-            annotated = draw(frame, all_targets, id_to_num, selected_num, fps=fps, input_buffer=input_buffer, show_overlay=show_overlay, auto_select=auto_select, color_filter=COLOR_CYCLE[color_filter_idx])
+            annotated = draw(frame, all_targets, id_to_num, selected_num, fps=fps, input_buffer=input_buffer, show_overlay=show_overlay, auto_select=auto_select, color_filter=COLOR_CYCLE[color_filter_idx], unit=cfg["coordinate_unit_label"], unit_per_meter=cfg["coordinate_unit_per_meter"])
             cv2.putText(annotated, hint_label, (annotated.shape[1] - hint_w - 10, hint_h + 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
             cv2.imshow(window_name, annotated)
             if now - last_print_time >= 1.0:
-                print(format_terminal_output(all_targets, id_to_num, selected_num))
+                print(format_terminal_output(all_targets, id_to_num, selected_num, cfg["coordinate_unit_label"]))
                 last_print_time = now
 
             key = cv2.waitKey(1) & 0xFF
