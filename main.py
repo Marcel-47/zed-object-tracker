@@ -101,6 +101,7 @@ def main():
     last_frame_time = time.monotonic()
     consecutive_grab_failures = 0
     window_name = "ZED Object Tracker"
+    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
 
     try:
         while True:
