@@ -66,6 +66,7 @@ This steps through each parameter, shows the current value and valid options, an
 | `depth_mode` | `PERFORMANCE` `QUALITY` `ULTRA` `NEURAL` `NEURAL_PLUS` | Depth estimation algorithm. Higher quality costs more compute. |
 | `detection_confidence_threshold` | `0`–`100` | Minimum confidence to report a detection. Lower catches more objects but increases false positives. |
 | `coordinate_units` | `MILLIMETER` `CENTIMETER` `METER` `INCH` `FOOT` | Unit for all X/Y/Z position values. |
+| `lighting` | `indoor` `outdoor` | Lighting preset for the color filter. `indoor` uses lower HSV saturation/value floors; `outdoor` raises them. Only affects the color filter. |
 | `enable_tracking` | `true` `false` | Keeps object IDs stable across frames. Disable to reduce CPU load. |
 | `enable_segmentation` | `true` `false` | Per-object pixel masks. Disable to reduce CPU load. |
 | `sdk_verbose` | `0` `1` | ZED SDK log output. `0` = silent, `1` = verbose. |
