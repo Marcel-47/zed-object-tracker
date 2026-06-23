@@ -102,6 +102,7 @@ def main():
     consecutive_grab_failures = 0
     window_name = "ZED Object Tracker"
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+    cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
 
     try:
         while True:
