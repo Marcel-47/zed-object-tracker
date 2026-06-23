@@ -100,6 +100,7 @@ def main():
     frame_times: deque = deque(maxlen=30)
     last_frame_time = time.monotonic()
     consecutive_grab_failures = 0
+    window_name = "ZED Object Tracker"
 
     try:
         while True:
@@ -142,13 +143,13 @@ def main():
             annotated = draw(frame, all_targets, id_to_num, selected_num, fps=fps, input_buffer=input_buffer, show_overlay=show_overlay, auto_select=auto_select, color_filter=COLOR_CYCLE[color_filter_idx])
             cv2.putText(annotated, hint_label, (annotated.shape[1] - hint_w - 10, hint_h + 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
-            cv2.imshow("ZED Object Tracker", annotated)
+            cv2.imshow(window_name, annotated)
             if now - last_print_time >= 1.0:
                 print(format_terminal_output(all_targets, id_to_num, selected_num))
                 last_print_time = now
 
             key = cv2.waitKey(1) & 0xFF
-            if key == ord('q'):
+            if key == ord('q') or cv2.getWindowProperty(window_name, cv2.WND_PROP_VISIBLE) < 1:
                 break
             elif key == 13:  # Enter
                 if input_buffer:
