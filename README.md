@@ -18,7 +18,7 @@ Real-time object detection and tracking using a ZED stereo camera. Detects objec
 ## Requirements
 
 - [ZED SDK](https://www.stereolabs.com/developers/release/) with Python bindings (`pyzed`)
-- ZED stereo camera
+- ZED X stereo camera
 - Python 3.10+
 - OpenCV (`cv2`)
 - NumPy
