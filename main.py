@@ -75,7 +75,7 @@ def main():
         zed.close()
         sys.exit(1)
 
-    detector = ZEDDetector(cfg["object_class"])
+    detector = ZEDDetector(cfg["object_class"], lighting=cfg["lighting"])
     image = sl.Mat()
     objects = sl.Objects()
     obj_runtime_param = sl.ObjectDetectionRuntimeParameters()

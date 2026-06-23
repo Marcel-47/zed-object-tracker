@@ -49,6 +49,13 @@ DETECTION_MODEL_MAP = {
     "MULTI_CLASS_BOX_ACCURATE": sl.OBJECT_DETECTION_MODEL.MULTI_CLASS_BOX_ACCURATE,
 }
 
+# Valid values for "lighting" in config.json.
+# Selects the HSV saturation/value floors the color filter uses.
+# indoor:  lower floors for dimmer indoor light (default)
+# outdoor: raised floors for brighter outdoor light
+# Only affects the color filter; the detection model is unaffected.
+LIGHTING_OPTIONS = ["indoor", "outdoor"]
+
 _DEFAULTS = {
     "depth_mode":                    "NEURAL",           # see DEPTH_MODE_MAP for valid values
     "coordinate_units":              "METER",            # see UNIT_MAP for valid values
@@ -58,6 +65,7 @@ _DEFAULTS = {
     "detection_model":               "MULTI_CLASS_BOX_ACCURATE",  # see DETECTION_MODEL_MAP for valid values
     "detection_confidence_threshold": 40,                # 0–100; lower catches more objects but increases false positives
     "object_class":                  "FRUIT_VEGETABLE",  # see OBJECT_CLASS_MAP for valid values
+    "lighting":                      "indoor",           # see LIGHTING_OPTIONS; tunes the color filter for indoor/outdoor light
 }
 
 
@@ -75,6 +83,9 @@ _CONFIGURE_FIELDS = [
     ("detection_confidence_threshold",
      "Minimum confidence (0-100) to report a detection. E.g., below ~30, people may be misclassified as FRUIT_VEGETABLE.",
      None),
+    ("lighting",
+     "Lighting preset for the color filter. indoor uses lower HSV saturation/value floors; outdoor raises them for brighter light. Only affects the color filter.",
+     LIGHTING_OPTIONS),
     ("coordinate_units",
      "Unit for all X/Y/Z position values reported per detected object.",
      list(UNIT_MAP)),
@@ -155,4 +166,5 @@ def load_config(path="config.json"):
         "detection_model":               DETECTION_MODEL_MAP[cfg["detection_model"]],
         "detection_confidence_threshold": int(cfg["detection_confidence_threshold"]),
         "object_class":                  OBJECT_CLASS_MAP[cfg["object_class"]],
+        "lighting":                      str(cfg["lighting"]).lower(),
     }

@@ -10,7 +10,12 @@ import pyzed.sl as sl
 # HSV color ranges for the color filter.
 # Each entry is a list of (h_lo, s_lo, v_lo, h_hi, s_hi, v_hi) tuples.
 # Red needs two entries because hue wraps around at 0/179 on the color wheel.
-_COLOR_RANGES = {
+# Hue boundaries are the same for both lighting presets; only the saturation
+# and value floors change. Indoor light is dimmer, so colors read less
+# saturated and darker and need lower floors. Outdoor light is brighter, so the
+# floors are raised to reject sun-washed, pale background. The outdoor floors
+# are seed values to refine on-site, the same way the indoor floors were tuned.
+_COLOR_RANGES_INDOOR = {
     "blue":   [(100, 80, 50, 130, 255, 255)],
     "red":    [(0,   60, 40,  10, 255, 255),
                (160, 60, 40, 179, 255, 255)],
@@ -18,6 +23,21 @@ _COLOR_RANGES = {
     "yellow": [(25,  80, 50,  35, 255, 255)],
     "orange": [(10,  80, 50,  25, 255, 255)],
     "purple": [(130, 80, 50, 160, 255, 255)],
+}
+
+_COLOR_RANGES_OUTDOOR = {
+    "blue":   [(100, 110, 80, 130, 255, 255)],
+    "red":    [(0,    90, 70,  10, 255, 255),
+               (160,  90, 70, 179, 255, 255)],
+    "green":  [(35,   90, 70,  85, 255, 255)],
+    "yellow": [(25,  110, 80,  35, 255, 255)],
+    "orange": [(10,  110, 80,  25, 255, 255)],
+    "purple": [(130, 110, 80, 160, 255, 255)],
+}
+
+_COLOR_RANGES_BY_LIGHTING = {
+    "indoor":  _COLOR_RANGES_INDOOR,
+    "outdoor": _COLOR_RANGES_OUTDOOR,
 }
 
 
@@ -58,14 +78,18 @@ class ZEDDetector(Detector):
     - Detection model accuracy vs. speed: set in main.py via
       obj_param.detection_model. Use MULTI_CLASS_BOX_ACCURATE for better accuracy
       or MULTI_CLASS_BOX_MEDIUM or MULTI_CLASS_BOX_FAST for higher frame rate.
-    - Color filter: set self.color_filter to a key from _COLOR_RANGES at runtime.
-      Objects whose bounding box does not contain enough of that color are discarded.
+    - Color filter: set self.color_filter to a key from the active color ranges
+      at runtime. Objects whose bounding box does not contain enough of that
+      color are discarded.
+    - Lighting preset: pass "indoor" or "outdoor" to __init__ to pick the
+      saturation/value floors the color filter uses. Configured via config.json.
     """
 
-    def __init__(self, object_class=sl.OBJECT_CLASS.FRUIT_VEGETABLE, color_match_threshold: float = 0.15):
+    def __init__(self, object_class=sl.OBJECT_CLASS.FRUIT_VEGETABLE, lighting: str = "indoor", color_match_threshold: float = 0.15):
         self.object_class = object_class
         self.color_filter: str = ""
         self.color_match_threshold = color_match_threshold
+        self._color_ranges = _COLOR_RANGES_BY_LIGHTING.get(lighting, _COLOR_RANGES_INDOOR)
 
     def get_all_target_positions(self, frame, objects) -> list[TargetPosition]:
         results = []
@@ -82,12 +106,12 @@ class ZEDDetector(Detector):
             x2 = int(bbox_corners[2][0])
             y2 = int(bbox_corners[2][1])
 
-            if self.color_filter in _COLOR_RANGES:
+            if self.color_filter in self._color_ranges:
                 region = frame[y1:y2, x1:x2]
                 if region.size > 0:
                     hsv = cv2.cvtColor(region, cv2.COLOR_BGR2HSV)
                     combined = np.zeros(hsv.shape[:2], dtype=np.uint8)
-                    for (hl, sl_, vl, hh, sh, vh) in _COLOR_RANGES[self.color_filter]:
+                    for (hl, sl_, vl, hh, sh, vh) in self._color_ranges[self.color_filter]:
                         combined = cv2.bitwise_or(combined, cv2.inRange(hsv, (hl, sl_, vl), (hh, sh, vh)))
                     if combined.mean() / 255 < self.color_match_threshold:
                         continue
