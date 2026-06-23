@@ -20,7 +20,10 @@ def _pos_label(target) -> str:
 
 
 def draw(frame, all_targets, id_to_num: dict, selected_num: int | None, fps=None, input_buffer: str = "", show_overlay: bool = True, auto_select: bool = False, color_filter: str = ""):
-    out = frame.copy()
+    # Annotate in place: main.py passes a fresh cv2.cvtColor output it does not
+    # reuse after this call, so copying would only add a per-frame full-frame
+    # allocation on the Jetson.
+    out = frame
     frame_h, frame_w = out.shape[:2]
 
     # --- Camera center crosshair (X=0, Y=0) ---
