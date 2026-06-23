@@ -53,7 +53,7 @@ def main():
     err = zed.open(init_params)
     if err > sl.ERROR_CODE.SUCCESS:
         print("Camera Open : "+repr(err)+". Exit program.")
-        exit()
+        sys.exit(1)
 
     obj_param = sl.ObjectDetectionParameters()
     obj_param.enable_tracking = cfg["enable_tracking"]       # keeps object IDs stable across frames
@@ -73,7 +73,7 @@ def main():
     if err != sl.ERROR_CODE.SUCCESS:
         print("Enable object detection : "+repr(err)+". Exit program.")
         zed.close()
-        exit()
+        sys.exit(1)
 
     detector = ZEDDetector(cfg["object_class"])
     image = sl.Mat()
