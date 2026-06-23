@@ -99,80 +99,88 @@ def main():
     (hint_w, hint_h), _ = cv2.getTextSize(hint_label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
     frame_times: deque = deque(maxlen=30)
     last_frame_time = time.monotonic()
+    consecutive_grab_failures = 0
 
-    while True:
-        if zed.grab() != sl.ERROR_CODE.SUCCESS:
-            continue
+    try:
+        while True:
+            if zed.grab() != sl.ERROR_CODE.SUCCESS:
+                consecutive_grab_failures += 1
+                if consecutive_grab_failures >= 30:
+                    print("Camera lost: too many consecutive grab failures. Exiting.")
+                    break
+                continue
+            consecutive_grab_failures = 0
 
-        now = time.monotonic()
-        frame_times.append(now - last_frame_time)
-        last_frame_time = now
-        total = sum(frame_times)
-        fps = len(frame_times) / total if total > 0 else None
+            now = time.monotonic()
+            frame_times.append(now - last_frame_time)
+            last_frame_time = now
+            total = sum(frame_times)
+            fps = len(frame_times) / total if total > 0 else None
 
-        zed.retrieve_image(image, sl.VIEW.LEFT)
-        zed.retrieve_objects(objects, obj_runtime_param)
+            zed.retrieve_image(image, sl.VIEW.LEFT)
+            zed.retrieve_objects(objects, obj_runtime_param)
 
-        frame = cv2.cvtColor(image.get_data(), cv2.COLOR_BGRA2BGR)
-        detector.color_filter = COLOR_CYCLE[color_filter_idx]
-        all_targets = detector.get_all_target_positions(frame, objects)
+            frame = cv2.cvtColor(image.get_data(), cv2.COLOR_BGRA2BGR)
+            detector.color_filter = COLOR_CYCLE[color_filter_idx]
+            all_targets = detector.get_all_target_positions(frame, objects)
 
-        current_ids = {t.track_id for t in all_targets}
-        for gone in list(id_to_num):
-            if gone not in current_ids:
-                del id_to_num[gone]
-        for t in all_targets:
-            if t.track_id not in id_to_num:
-                used = set(id_to_num.values())
-                id_to_num[t.track_id] = next(n for n in range(1, len(used) + 2) if n not in used)
-        if selected_num not in id_to_num.values():
-            selected_num = None
+            current_ids = {t.track_id for t in all_targets}
+            for gone in list(id_to_num):
+                if gone not in current_ids:
+                    del id_to_num[gone]
+            for t in all_targets:
+                if t.track_id not in id_to_num:
+                    used = set(id_to_num.values())
+                    id_to_num[t.track_id] = next(n for n in range(1, len(used) + 2) if n not in used)
+            if selected_num not in id_to_num.values():
+                selected_num = None
 
-        if auto_select and all_targets:
-            closest = min(all_targets, key=lambda t: t.z)
-            selected_num = id_to_num.get(closest.track_id)
+            if auto_select and all_targets:
+                closest = min(all_targets, key=lambda t: t.z)
+                selected_num = id_to_num.get(closest.track_id)
 
-        annotated = draw(frame, all_targets, id_to_num, selected_num, fps=fps, input_buffer=input_buffer, show_overlay=show_overlay, auto_select=auto_select, color_filter=COLOR_CYCLE[color_filter_idx])
-        cv2.putText(annotated, hint_label, (annotated.shape[1] - hint_w - 10, hint_h + 10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
-        cv2.imshow("ZED Object Tracker", annotated)
-        if now - last_print_time >= 1.0:
-            print(format_terminal_output(all_targets, id_to_num, selected_num))
-            last_print_time = now
+            annotated = draw(frame, all_targets, id_to_num, selected_num, fps=fps, input_buffer=input_buffer, show_overlay=show_overlay, auto_select=auto_select, color_filter=COLOR_CYCLE[color_filter_idx])
+            cv2.putText(annotated, hint_label, (annotated.shape[1] - hint_w - 10, hint_h + 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv2.LINE_AA)
+            cv2.imshow("ZED Object Tracker", annotated)
+            if now - last_print_time >= 1.0:
+                print(format_terminal_output(all_targets, id_to_num, selected_num))
+                last_print_time = now
 
-        key = cv2.waitKey(1) & 0xFF
-        if key == ord('q'):
-            break
-        elif key == 13:  # Enter
-            if input_buffer:
-                n = int(input_buffer)
-                selected_num = None if n == 0 else n
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord('q'):
+                break
+            elif key == 13:  # Enter
+                if input_buffer:
+                    n = int(input_buffer)
+                    selected_num = None if n == 0 else n
+                    input_buffer = ""
+                    auto_select = False
+            elif key == 27:  # Escape
                 input_buffer = ""
+            elif key == ord('r'):
+                id_to_num.clear()
+                selected_num = None
+                input_buffer = ""
+                show_overlay = True
                 auto_select = False
-        elif key == 27:  # Escape
-            input_buffer = ""
-        elif key == ord('r'):
-            id_to_num.clear()
-            selected_num = None
-            input_buffer = ""
-            show_overlay = True
-            auto_select = False
-            color_filter_idx = 0
-        elif key == ord('h'):
-            show_overlay = not show_overlay
-        elif key == ord('f'):
-            color_filter_idx = (color_filter_idx + 1) % len(COLOR_CYCLE)
-        elif key == ord('c'):
-            auto_select = not auto_select
-        elif key == 8:  # Backspace
-            input_buffer = input_buffer[:-1]
-        elif ord('0') <= key <= ord('9'):
-            input_buffer += chr(key)
-
-    # Close the camera
-    zed.disable_object_detection()
-    zed.close()
-    cv2.destroyAllWindows()
+                color_filter_idx = 0
+            elif key == ord('h'):
+                show_overlay = not show_overlay
+            elif key == ord('f'):
+                color_filter_idx = (color_filter_idx + 1) % len(COLOR_CYCLE)
+            elif key == ord('c'):
+                auto_select = not auto_select
+            elif key == 8:  # Backspace
+                input_buffer = input_buffer[:-1]
+            elif ord('0') <= key <= ord('9'):
+                input_buffer += chr(key)
+    finally:
+        # Always release the camera, even on Ctrl+C or an unexpected error,
+        # so the ZED is not left open (which can require a physical replug).
+        zed.disable_object_detection()
+        zed.close()
+        cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
