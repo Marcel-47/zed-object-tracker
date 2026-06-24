@@ -96,7 +96,9 @@ class ZEDDetector(Detector):
         for obj in objects.object_list:
             if obj.label != self.object_class:
                 continue
-            x, y, z = float(obj.position[0]), float(obj.position[1]), float(obj.position[2])
+            # The ZED SDK's default IMAGE coordinate system has +Y pointing down;
+            # negate it so +Y means up for the rest of the pipeline.
+            x, y, z = float(obj.position[0]), -float(obj.position[1]), float(obj.position[2])
             if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(z)):
                 continue
             confidence = float(obj.confidence) / 100.0
